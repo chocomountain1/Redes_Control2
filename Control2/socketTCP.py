@@ -42,7 +42,8 @@ class SocketTCP:
     def parse_segment(TCP_segment):
         var_list = TCP_segment.split("|||")
         print(var_list)
-
+        #1ra iteracion: "0|||0|||0|||0|||''"
+        #2da iteracion: "0|||0|||0|||0||''"
         return {
             "syn": var_list[0],
             "ack": var_list[1],

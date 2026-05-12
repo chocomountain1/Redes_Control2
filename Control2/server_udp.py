@@ -1,13 +1,18 @@
-import socket
+import socketTCP
 
 #Creamos socket no orientado a conexión basado en UDP
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+tcp_sock = socketTCP.SocketTCP()
 
 #Lo asociamos a las credenciales de la MV
-sock.bind(("10.0.2.15", 8000))
+tcp_sock.socket_udp.bind(("10.0.2.15", 8000))
 
 while True:
-    data,adrr = sock.recvfrom(16)
+    segment,adrr = tcp_sock.socket_udp.recvfrom(16)
 
+    segment = segment.decode()
+
+    print(segment)
+
+    dic = tcp_sock.parse_segment(segment)
     #Printeamos por cada loop del while, sin preoucuparnos cuando termina
-    print(data)
+    print(dic["data"])

@@ -1,10 +1,14 @@
+import socket
+
 class SocketTCP:
     def __init__(self):
         # inicializamos las variables que definen un SocketTCP
         # los datos que aun no sabemos se ponen como None
-        self.socket_udp = None
-        self.direccion_destino = None
-        self.direccion_origen = None
+
+        #En cada instancia de esta clase tendremos acceso a un socket udp interno
+        self.socket_udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.direccion_destino = ("10.0.2.15", 8000) 
+        self.direccion_origen = ("10.0.2.15", 8000) #Ambas las dejamos iguales por ahora, pero podrían sobreescribirse
         self.numero_secuencia = 0
         self.msg = None
         self.timeout = 0
@@ -31,3 +35,28 @@ class SocketTCP:
     def set_length(self, length):
         self.length = length
 
+    # Método estático que tomando un segmento TCP de la forma
+    # [SYN]|||[ACK]|||[FIN]|||[SEQ]|||[DATOS] lo pasa a un diccionario
+    #Agregamos que sea un método estático para que no se pase self como argumento
+    @staticmethod
+    def parse_segment(TCP_segment):
+        var_list = TCP_segment.split("|||")
+        print(var_list)
+
+        return {
+            "syn": var_list[0],
+            "ack": var_list[1],
+            "fin": var_list[2],
+            "seq": var_list[3],
+            "data": var_list[4]
+        }
+    
+    # Método estático que dado seq y una fuente de data crea un segmento TCP de la forma
+    # [SYN]|||[ACK]|||[FIN]|||[SEQ]|||[DATOS] retornando dicho string
+    #Agregamos que sea un método estático para que no se pase self como argumento
+    @staticmethod
+    def create_segment(syn, ack, fin, seq, data):
+
+        return f"{syn}|||{ack}|||{fin}|||{seq}|||{data}"
+
+    

@@ -61,3 +61,6 @@ class SocketTCP:
         return f"{syn}|||{ack}|||{fin}|||{seq}|||{data}"
 
     
+    def bind(self, address): 
+        self.socket_udp.bind(address)
+        self.set_direccion_origen(address)

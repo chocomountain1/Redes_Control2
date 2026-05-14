@@ -1,4 +1,5 @@
 import socket
+import random
 
 class SocketTCP:
     def __init__(self):
@@ -64,3 +65,30 @@ class SocketTCP:
         return f"{syn}|||{ack}|||{fin}|||{seq}|||{data}"
 
     
+    def bind(self, address): 
+        self.socket_udp.bind(address)
+        self.set_direccion_origen(address)
+
+    def connect(self,address):
+        self.set_direccion_destino(address)
+
+        seq_inicial = random.randint(0, 100)
+        self.set_numero_secuencia(seq_inicial)
+
+        # Envía el syn para establecer conexión, primera parte del handshake
+        segment1 = self.create_segment(1, 0, 0, seq_inicial, "")
+        self.socket_udp.sendto(segment1.encode(), address)
+
+        # Se recibe respuesta del server y preparamos la respuesta para enviar tercera parte del handshake
+        response, server_address = self.socket_udp.recvfrom(1024)
+        response = response.decode()
+        response2 = self.parse_segment(response)
+
+        if response2["syn"] == 1 and response2["ack"] == 1:
+            #Se crea el 3 segmento de los pasos del handshake
+            segment3 = self.create_segment(0, 1, 0, seq_inicial+1, "")
+            self.socket_udp.sendto(segment3.encode(), server_address)
+            self.set_direccion_destino(server_address)
+            self.set_numero_secuencia(seq_inicial+1)
+        else:
+            print("El servidor no devolvió un mensaje syn ack")

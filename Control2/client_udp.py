@@ -13,16 +13,23 @@ seq = 0
 #Se utiliza rb pues así nos queda de inmediato en bytes la información por chunk de data
 with open(path, "rb") as f:
     while True:
-        #Limitamos la lectura a 16bytes
+        #Limitamos la lectura de los datos a 16bytes
         chunk = f.read(16)
 
+        #Si no hay más que leer entonces salimos
         if not chunk:
            break
         
+        #Antes de wrappear la data dentro del segmento la decodeamos para que bytes -> str
         data = chunk.decode()
+        
+        #Aquí usamos el método estático del socket TCP para crear un segmento TCP
         segment = tcp_sock.create_segment(0,0,0,seq,data).encode()
-
+        
+        #Aumentamos seq a lo que alcanzamos a leer
         seq += len(chunk)
+        
+        #Finalmente mandamos el segmento al servidor
         tcp_sock.socket_udp.sendto(segment, SERVER_ADRESS)
 
 #Agregamos un print sólo para saber si el archivo se envió

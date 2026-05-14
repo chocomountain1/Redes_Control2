@@ -40,10 +40,13 @@ class SocketTCP:
     #Agregamos que sea un método estático para que no se pase self como argumento
     @staticmethod
     def parse_segment(TCP_segment):
-        var_list = TCP_segment.split("|||")
-        print(var_list)
-        #1ra iteracion: "0|||0|||0|||0|||''"
-        #2da iteracion: "0|||0|||0|||0||''"
+
+        #Decodeamos dentro puesto que asumimos que TCP_segment viene en bytes
+        decoded_seg = TCP_segment.decode()
+
+        #Separamos por |||
+        var_list = decoded_seg.split("|||")
+        
         return {
             "syn": var_list[0],
             "ack": var_list[1],
@@ -57,7 +60,7 @@ class SocketTCP:
     #Agregamos que sea un método estático para que no se pase self como argumento
     @staticmethod
     def create_segment(syn, ack, fin, seq, data):
-
+        
         return f"{syn}|||{ack}|||{fin}|||{seq}|||{data}"
 
     

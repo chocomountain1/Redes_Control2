@@ -100,21 +100,35 @@ class SocketTCP:
             print("El servidor no devolvió un mensaje syn ack")
 
     def accept(self):
+        #Creamos una nueva adrress incrementando el puerto en 1
         new_adress = (self.direccion_destino[0],self.direccion_destino[1]+1)
+        #Aceptamos lo que nos manda el cliente en la primera parte del 3-way-handshake
         response, client_adress = self.socket_udp.recvfrom(1024)
 
+        #Parseamos la respuesta del cliente
         response = self.parse_segment(response)
+
+        #Desambiguamos si la respuesta contiene SYN == 1
         if int(response['syn']) == 1:
             #Creamos el segmento 2 de los pasos del handshake
             segment2 = self.create_segment(1,1,0,self.numero_secuencia_servidor+1,"")
+            #Mandamos el segmento2 al cliente, para el siguiente paso de 3-way-handshake
             self.socket_udp.sendto(segment2.encode(), client_adress)
+            #Seteamos la dirección de destino hacia el cliente
             self.set_direccion_destino(client_adress)
+            #Actualizamos el numero de secuencia del servidor
             self.set_numero_secuencia_servidor(self.numero_secuencia_servidor+1)
+            
+            #Finalmente, aceptamos la parte final de 3-way-handshake
             response, _ = self.socket_udp.recvfrom(1024)
+            #Parseamos la respuesta
             response = self.parse_segment(response)
+            #Obtenemos el numero de secuencia del cliente para almacenarlo en el socket de retorno
             numero_secuencia_cliente = response["seq"]
 
+            #Desambiguamos si el segmento contiene ACK == 1
             if int(response["ack"]) == 1:
+                #Si es asi entonces creamos un nuevo TCP socket bindeado a la nueva dirección, recordando el numero de secuencia del servidor y del cliente
                 return_tcp = SocketTCP()
                 return_tcp.set_direccion_origen(new_adress)
                 return_tcp.set_direccion_destino(client_adress)
